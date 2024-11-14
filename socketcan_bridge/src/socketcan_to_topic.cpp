@@ -52,7 +52,7 @@ namespace socketcan_bridge
   SocketCANToTopic::SocketCANToTopic(ros::NodeHandle* nh, ros::NodeHandle* nh_param,
       can::DriverInterfaceSharedPtr driver)
     {
-      can_topic_ = nh->advertise<can_msgs::FrameFd>("received_messages",
+      can_fd_topic_ = nh->advertise<can_msgs::FrameFd>("received_messages",
                                                   nh_param->param("received_messages_queue_size", 10));
       driver_ = driver;
     };
@@ -113,7 +113,7 @@ namespace socketcan_bridge
       msg.header.frame_id = "";  // empty frame is the de-facto standard for no frame.
       msg.header.stamp = ros::Time::now();
 
-      can_topic_.publish(msg);
+      can_fd_topic_.publish(msg);
     };
 
 

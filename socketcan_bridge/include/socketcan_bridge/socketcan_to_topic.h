@@ -45,7 +45,7 @@ class SocketCANToTopic
     void setup(ros::NodeHandle nh);
 
   private:
-    ros::Publisher can_topic_;
+    ros::Publisher can_fd_topic_;
     can::DriverInterfaceSharedPtr driver_;
 
     can::FrameListenerConstSharedPtr frame_listener_;
