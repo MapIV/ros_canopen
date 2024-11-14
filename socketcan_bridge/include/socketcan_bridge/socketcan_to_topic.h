@@ -30,6 +30,7 @@
 
 #include <socketcan_interface/socketcan.h>
 #include <socketcan_interface/filter.h>
+#include <can_msgs/Frame.h>
 #include <can_msgs/FrameFd.h>
 #include <ros/ros.h>
 
@@ -45,6 +46,7 @@ class SocketCANToTopic
     void setup(ros::NodeHandle nh);
 
   private:
+    ros::Publisher can_topic_;
     ros::Publisher can_fd_topic_;
     can::DriverInterfaceSharedPtr driver_;
 
@@ -56,7 +58,21 @@ class SocketCANToTopic
     void stateCallback(const can::State & s);
 };
 
-void convertSocketCANToMessage(const can::Frame& f, can_msgs::FrameFd& m)
+void convertSocketCANToMessage(const can::Frame& f, can_msgs::Frame& m)
+{
+  m.id = f.id;
+  m.dlc = f.dlc;
+  m.is_error = f.is_error;
+  m.is_rtr = f.is_rtr;
+  m.is_extended = f.is_extended;
+
+  for (int i = 0; i < 1; i++)
+  {
+    m.data[i] = f.data[i];
+  }
+};
+
+void convertSocketCANFDToMessage(const can::Frame& f, can_msgs::FrameFd& m)
 {
   m.id = f.id;
   m.dlc = f.dlc;
