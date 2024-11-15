@@ -147,7 +147,7 @@ TEST(ConversionTest, topicToSocketCANStandard)
   {
     m.data.push_back(i);
   }
-  socketcan_bridge::convertMessageToSocketCAN(m, f);
+  socketcan_bridge::convertMessageToSocketCANFD(m, f);
   EXPECT_EQ(127, f.id);
   EXPECT_EQ(8, f.dlc);
   EXPECT_EQ(false, f.is_error);
@@ -167,17 +167,17 @@ TEST(ConversionTest, topicToSocketCANFlags)
   can_msgs::FrameFd m;
 
   m.is_error = true;
-  socketcan_bridge::convertMessageToSocketCAN(m, f);
+  socketcan_bridge::convertMessageToSocketCANFD(m, f);
   EXPECT_EQ(true, f.is_error);
   m.is_error = false;
 
   m.is_rtr = true;
-  socketcan_bridge::convertMessageToSocketCAN(m, f);
+  socketcan_bridge::convertMessageToSocketCANFD(m, f);
   EXPECT_EQ(true, f.is_rtr);
   m.is_rtr = false;
 
   m.is_extended = true;
-  socketcan_bridge::convertMessageToSocketCAN(m, f);
+  socketcan_bridge::convertMessageToSocketCANFD(m, f);
   EXPECT_EQ(true, f.is_extended);
   m.is_extended = false;
 }
