@@ -98,7 +98,7 @@ TEST(TopicToSocketCANTest, checkCorrectData)
 
   can_msgs::FrameFd received;
   can::Frame f = frame_collector_.frames.back();
-  socketcan_bridge::convertSocketCANToMessage(f, received);
+  socketcan_bridge::convertSocketCANFDToMessage(f, received);
 
   EXPECT_EQ(received.id, msg.id);
   EXPECT_EQ(received.dlc, msg.dlc);
@@ -157,7 +157,7 @@ TEST(TopicToSocketCANTest, checkCorrectFdData)
 
   can_msgs::FrameFd received;
   can::Frame f = frame_collector_.frames.back();
-  socketcan_bridge::convertSocketCANToMessage(f, received);
+  socketcan_bridge::convertSocketCANFDToMessage(f, received);
 
   EXPECT_EQ(received.id, msg.id);
   EXPECT_EQ(received.dlc, 64);

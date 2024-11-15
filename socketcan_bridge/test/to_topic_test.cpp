@@ -54,7 +54,7 @@ class msgCollector
 std::string convertMessageToString(const can_msgs::FrameFd &msg, bool lc = true)
 {
   can::Frame f;
-  socketcan_bridge::convertMessageToSocketCAN(msg, f);
+  socketcan_bridge::convertMessageToSocketCANFD(msg, f);
   return can::tostring(f, lc);
 }
 
@@ -102,7 +102,7 @@ TEST(SocketCANToTopicTest, checkCorrectData)
   // compare the received can_msgs::FrameFd message to the sent can::Frame.
   can::Frame received;
   can_msgs::FrameFd msg = message_collector_.messages.back();
-  socketcan_bridge::convertMessageToSocketCAN(msg, received);
+  socketcan_bridge::convertMessageToSocketCANFD(msg, received);
 
   EXPECT_EQ(received.id, f.id);
   EXPECT_EQ(received.dlc, f.dlc);
@@ -160,7 +160,7 @@ TEST(SocketCANToTopicTest, checkCorrectFdData)
   // compare the received can_msgs::FrameFd message to the sent can::Frame.
   can::Frame received;
   can_msgs::FrameFd msg = message_collector_.messages.back();
-  socketcan_bridge::convertMessageToSocketCAN(msg, received);
+  socketcan_bridge::convertMessageToSocketCANFD(msg, received);
 
   EXPECT_EQ(received.id, f.id);
   EXPECT_EQ(received.dlc, f.dlc);
@@ -268,7 +268,7 @@ TEST(SocketCANToTopicTest, checkCorrectCanIdFilter)
   // compare the received can_msgs::FrameFd message to the sent can::Frame.
   can::Frame received;
   can_msgs::FrameFd msg = message_collector_.messages.back();
-  socketcan_bridge::convertMessageToSocketCAN(msg, received);
+  socketcan_bridge::convertMessageToSocketCANFD(msg, received);
 
   EXPECT_EQ(received.id, f.id);
   EXPECT_EQ(received.dlc, f.dlc);

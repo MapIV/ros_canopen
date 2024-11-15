@@ -34,7 +34,7 @@ namespace socketcan_bridge
   TopicToSocketCAN::TopicToSocketCAN(ros::NodeHandle* nh, ros::NodeHandle* nh_param,
       can::DriverInterfaceSharedPtr driver)
     {
-      can_topic_ = nh->subscribe<can_msgs::FrameFd>("sent_messages", nh_param->param("sent_messages_queue_size", 10),
+      can_fd_topic_ = nh->subscribe<can_msgs::FrameFd>("sent_fd_messages", nh_param->param("sent_fd_messages_queue_size", 10),
                     std::bind(&TopicToSocketCAN::msgCallback, this, std::placeholders::_1));
       driver_ = driver;
     };
@@ -55,7 +55,7 @@ namespace socketcan_bridge
       can::Frame f;  // socketcan type
 
       // converts the can_msgs::FrameFd (ROS msg) to can::Frame (socketcan.h)
-      convertMessageToSocketCAN(m, f);
+      convertMessageToSocketCANFD(m, f);
 
       if (!f.isValid())  // check if the id and flags are appropriate.
       {

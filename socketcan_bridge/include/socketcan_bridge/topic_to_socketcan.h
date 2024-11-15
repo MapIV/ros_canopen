@@ -51,7 +51,7 @@ class TopicToSocketCAN
     void setup();
 
   private:
-    ros::Subscriber can_topic_;
+    ros::Subscriber can_fd_topic_;
     can::DriverInterfaceSharedPtr driver_;
 
     can::StateListenerConstSharedPtr state_listener_;
@@ -60,7 +60,7 @@ class TopicToSocketCAN
     void stateCallback(const can::State & s);
 };
 
-void convertMessageToSocketCAN(const can_msgs::FrameFd& m, can::Frame& f)
+void convertMessageToSocketCANFD(const can_msgs::FrameFd& m, can::Frame& f)
 {
   f.id = m.id;
   f.dlc = (m.dlc & CANMSG_DLC_DLC_MASK) >> CANMSG_DLC_DLC_OFFSET;
