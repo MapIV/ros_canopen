@@ -34,8 +34,10 @@ namespace socketcan_bridge
   TopicToSocketCAN::TopicToSocketCAN(ros::NodeHandle* nh, ros::NodeHandle* nh_param,
       can::DriverInterfaceSharedPtr driver)
     {
-      can_fd_topic_ = nh->subscribe<can_msgs::FrameFd>("sent_fd_messages", nh_param->param("sent_fd_messages_queue_size", 10),
+      can_topic_ = nh->subscribe<can_msgs::Frame>("sent_messages", nh_param->param("sent_messages_queue_size", 10),
                     std::bind(&TopicToSocketCAN::msgCallback, this, std::placeholders::_1));
+      can_fd_topic_ = nh->subscribe<can_msgs::FrameFd>("sent_fd_messages", nh_param->param("sent_fd_messages_queue_size", 10),
+                    std::bind(&TopicToSocketCAN::msgFdCallback, this, std::placeholders::_1));
       driver_ = driver;
     };
 
@@ -45,7 +47,36 @@ namespace socketcan_bridge
               std::bind(&TopicToSocketCAN::stateCallback, this, std::placeholders::_1));
     };
 
-  void TopicToSocketCAN::msgCallback(const can_msgs::FrameFd::ConstPtr& msg)
+  void TopicToSocketCAN::msgCallback(const can_msgs::Frame::ConstPtr& msg)
+    {
+      // ROS_DEBUG("Message came from sent_messages topic");
+
+      // translate it to the socketcan frame type.
+
+      can_msgs::Frame m = *msg.get();  // ROS message
+      can::Frame f;  // socketcan type
+
+      // converts the can_msgs::FrameFd (ROS msg) to can::Frame (socketcan.h)
+      convertMessageToSocketCAN(m, f);
+
+      if (!f.isValid())  // check if the id and flags are appropriate.
+      {
+        // ROS_WARN("Refusing to send invalid frame: %s.", can::tostring(f, true).c_str());
+        // can::tostring cannot be used for dlc > 8 frames. It causes an crash
+        // due to usage of boost::array for the data array. The should always work.
+        ROS_ERROR("Invalid frame from topic: id: %#04x, length: %d, is_extended: %d", m.id, m.dlc, m.is_extended);
+        return;
+      }
+
+      bool res = driver_->send(f);
+      if (!res)
+      {
+        ROS_ERROR("Failed to send message: %s.", can::tostring(f, true).c_str());
+      }
+    };
+
+
+  void TopicToSocketCAN::msgFdCallback(const can_msgs::FrameFd::ConstPtr& msg)
     {
       // ROS_DEBUG("Message came from sent_messages topic");
 
@@ -72,7 +103,6 @@ namespace socketcan_bridge
         ROS_ERROR("Failed to send message: %s.", can::tostring(f, true).c_str());
       }
     };
-
 
 
   void TopicToSocketCAN::stateCallback(const can::State & s)

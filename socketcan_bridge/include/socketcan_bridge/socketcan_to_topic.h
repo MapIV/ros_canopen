@@ -66,7 +66,7 @@ void convertSocketCANToMessage(const can::Frame& f, can_msgs::Frame& m)
   m.is_rtr = f.is_rtr;
   m.is_extended = f.is_extended;
 
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; i < 8; i++)
   {
     m.data[i] = f.data[i];
   }

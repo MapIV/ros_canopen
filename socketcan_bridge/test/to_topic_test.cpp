@@ -42,17 +42,30 @@
 class msgCollector
 {
   public:
-    std::list<can_msgs::FrameFd> messages;
+    std::list<can_msgs::Frame> messages;
+    std::list<can_msgs::FrameFd> messages_fd;
 
     msgCollector() {}
 
-    void msgCallback(const can_msgs::FrameFd& f)
+    void msgCallback(const can_msgs::Frame& f)
     {
       messages.push_back(f);
     }
+
+    void msgFdCallback(const can_msgs::FrameFd& f)
+    {
+      messages_fd.push_back(f);
+    }
 };
 
-std::string convertMessageToString(const can_msgs::FrameFd &msg, bool lc = true)
+std::string convertMessageToString(const can_msgs::Frame &msg, bool lc = true)
+{
+  can::Frame f;
+  socketcan_bridge::convertMessageToSocketCAN(msg, f);
+  return can::tostring(f, lc);
+}
+
+std::string convertFdMessageToString(const can_msgs::FrameFd &msg, bool lc = true)
 {
   can::Frame f;
   socketcan_bridge::convertMessageToSocketCANFD(msg, f);
@@ -76,12 +89,12 @@ TEST(SocketCANToTopicTest, checkCorrectData)
   // create a frame collector.
   msgCollector message_collector_;
 
-  // register for messages on received_fd_messages.
-  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgCallback, &message_collector_);
+  // register for messages on received_messages.
+  ros::Subscriber subscriber_ = nh.subscribe("received_messages", 1, &msgCollector::msgCallback, &message_collector_);
 
   // create a can frame
   can::Frame f;
-  f.is_fd = true;
+  f.is_fd = false;
   f.is_extended = true;
   f.is_rtr = false;
   f.is_error = false;
@@ -103,8 +116,12 @@ TEST(SocketCANToTopicTest, checkCorrectData)
 
   // compare the received can_msgs::FrameFd message to the sent can::Frame.
   can::Frame received;
-  can_msgs::FrameFd msg = message_collector_.messages.back();
-  socketcan_bridge::convertMessageToSocketCANFD(msg, received);
+  can_msgs::Frame msg = message_collector_.messages.back();
+  socketcan_bridge::convertMessageToSocketCAN(msg, received);
+
+  can::Frame received_fd;
+  can_msgs::FrameFd msg_fd = message_collector_.messages_fd.back();
+  socketcan_bridge::convertMessageToSocketCANFD(msg_fd, received_fd);
 
   EXPECT_EQ(received.id, f.id);
   EXPECT_EQ(received.dlc, f.dlc);
@@ -114,6 +131,9 @@ TEST(SocketCANToTopicTest, checkCorrectData)
   for (int i = 0; i < f.dlc; ++i)
   {
     EXPECT_EQ(received.data[i], f.data[i]);
+
+    // just for debug
+    EXPECT_EQ(msg.data[i], f.data[i]);
   }
 }
 
@@ -135,7 +155,7 @@ TEST(SocketCANToTopicTest, checkCorrectFdData)
   msgCollector message_collector_;
 
   // register for messages on received_fd_messages.
-  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgCallback, &message_collector_);
+  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgFdCallback, &message_collector_);
 
   // create a can frame
   can::Frame f;
@@ -162,7 +182,7 @@ TEST(SocketCANToTopicTest, checkCorrectFdData)
 
   // compare the received can_msgs::FrameFd message to the sent can::Frame.
   can::Frame received;
-  can_msgs::FrameFd msg = message_collector_.messages.back();
+  can_msgs::FrameFd msg = message_collector_.messages_fd.back();
   socketcan_bridge::convertMessageToSocketCANFD(msg, received);
 
   EXPECT_EQ(received.id, f.id);
@@ -199,7 +219,7 @@ TEST(SocketCANToTopicTest, checkInvalidFrameHandling)
   msgCollector message_collector_;
 
   // register for messages on received_fd_messages.
-  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgCallback, &message_collector_);
+  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgFdCallback, &message_collector_);
 
   // create a message
   can::Frame f;
@@ -245,7 +265,7 @@ TEST(SocketCANToTopicTest, checkCorrectCanIdFilter)
   msgCollector message_collector_;
 
   // register for messages on received_fd_messages.
-  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgCallback, &message_collector_);
+  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgFdCallback, &message_collector_);
 
   // create a can frame
   can::Frame f;
@@ -271,8 +291,8 @@ TEST(SocketCANToTopicTest, checkCorrectCanIdFilter)
 
   // compare the received can_msgs::FrameFd message to the sent can::Frame.
   can::Frame received;
-  can_msgs::FrameFd msg = message_collector_.messages.back();
-  socketcan_bridge::convertMessageToSocketCANFD(msg, received);
+  can_msgs::Frame msg = message_collector_.messages.back();
+  socketcan_bridge::convertMessageToSocketCAN(msg, received);
 
   EXPECT_EQ(received.id, f.id);
   EXPECT_EQ(received.dlc, f.dlc);
@@ -307,7 +327,7 @@ TEST(SocketCANToTopicTest, checkInvalidCanIdFilter)
   msgCollector message_collector_;
 
   // register for messages on received_fd_messages.
-  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgCallback, &message_collector_);
+  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgFdCallback, &message_collector_);
 
   // create a can frame
   can::Frame f;
@@ -354,7 +374,7 @@ TEST(SocketCANToTopicTest, checkMaskFilter)
   msgCollector message_collector_;
 
   // register for messages on received_fd_messages.
-  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 10, &msgCollector::msgCallback, &message_collector_);
+  ros::Subscriber subscriber_ = nh.subscribe("received_messages", 10, &msgCollector::msgCallback, &message_collector_);
 
   const std::string pass1("300#1234"), nopass1("302#9999"), pass2("301#5678");
 
@@ -367,8 +387,8 @@ TEST(SocketCANToTopicTest, checkMaskFilter)
   ros::WallDuration(1.0).sleep();
   ros::spinOnce();
 
-  // compare the received can_msgs::FrameFd message to the sent can::Frame.
-  ASSERT_EQ(2, message_collector_.messages.size());
+  // compare the received can_msgs::Frame message to the sent can::Frame.
+  ASSERT_EQ(2, message_collector_.messages_fd.size());
   EXPECT_EQ(pass1, convertMessageToString(message_collector_.messages.front()));
   EXPECT_EQ(pass2, convertMessageToString(message_collector_.messages.back()));
 }
