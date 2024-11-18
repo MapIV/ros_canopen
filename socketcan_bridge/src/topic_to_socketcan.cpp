@@ -36,8 +36,10 @@ namespace socketcan_bridge
     {
       can_topic_ = nh->subscribe<can_msgs::Frame>("sent_messages", nh_param->param("sent_messages_queue_size", 10),
                     std::bind(&TopicToSocketCAN::msgCallback, this, std::placeholders::_1));
-      can_fd_topic_ = nh->subscribe<can_msgs::FrameFd>("sent_fd_messages", nh_param->param("sent_fd_messages_queue_size", 10),
-                    std::bind(&TopicToSocketCAN::msgFdCallback, this, std::placeholders::_1));
+      can_fd_topic_ = nh->subscribe<can_msgs::FrameFd>(
+                      "sent_fd_messages",
+                      nh_param->param("sent_fd_messages_queue_size", 10),
+                      std::bind(&TopicToSocketCAN::msgFdCallback, this, std::placeholders::_1));
       driver_ = driver;
     };
 

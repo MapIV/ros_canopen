@@ -123,7 +123,7 @@ TEST(TopicToSocketCANTest, checkCorrectFdData)
   driver_->init("string_not_used", true);
 
   // register for messages on received_fd_messages.
-  ros::Publisher publisher_ = nh.advertise<can_msgs::FrameFd>("sent_messages", 10);
+  ros::Publisher publisher_ = nh.advertise<can_msgs::FrameFd>("sent_fd_messages", 10);
 
   // create a frame collector.
   frameCollector frame_collector_;
@@ -185,7 +185,7 @@ TEST(TopicToSocketCANTest, checkInvalidFrameHandling)
   to_socketcan_bridge.setup();
 
   // register for messages on received_fd_messages.
-  ros::Publisher publisher_ = nh.advertise<can_msgs::FrameFd>("sent_messages", 10);
+  ros::Publisher publisher_ = nh.advertise<can_msgs::FrameFd>("sent_fd_messages", 10);
 
   // create a frame collector.
   frameCollector frame_collector_;

@@ -109,7 +109,8 @@ namespace socketcan_bridge
         }
       }
 
-      if(f.is_fd){
+      if (f.is_fd)
+      {
         can_msgs::FrameFd msg;
         // converts the can::Frame (socketcan.h) to can_msgs::FrameFd (ROS msg)
         convertSocketCANFDToMessage(f, msg);
@@ -118,7 +119,9 @@ namespace socketcan_bridge
         msg.header.stamp = ros::Time::now();
 
         can_fd_topic_.publish(msg);
-      }else{
+      }
+      else
+      {
         can_msgs::Frame msg;
         // converts the can::Frame (socketcan.h) to can_msgs::Frame (ROS msg)
         convertSocketCANToMessage(f, msg);

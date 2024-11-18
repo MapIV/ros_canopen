@@ -73,7 +73,7 @@ void convertMessageToSocketCAN(const can_msgs::Frame& m, can::Frame& f)
   f.is_rtr = m.is_rtr;
   f.is_extended = m.is_extended;
 
-  //int copy_len = m.data.size() > f.data.size() ? f.data.size() : m.data.size();
+  // int copy_len = m.data.size() > f.data.size() ? f.data.size() : m.data.size();
   int copy_len = 8;
 
   for (int i = 0; i < copy_len; i++)
