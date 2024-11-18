@@ -27,6 +27,7 @@
 
 #include <socketcan_bridge/socketcan_to_topic.h>
 #include <socketcan_interface/string.h>
+#include <can_msgs/FrameFd.h>
 #include <can_msgs/Frame.h>
 #include <string>
 
@@ -54,6 +55,8 @@ namespace socketcan_bridge
     {
       can_topic_ = nh->advertise<can_msgs::Frame>("received_messages",
                                                   nh_param->param("received_messages_queue_size", 10));
+      can_fd_topic_ = nh->advertise<can_msgs::FrameFd>("received_fd_messages",
+                                                  nh_param->param("received_fd_messages_queue_size", 10));
       driver_ = driver;
     };
 
@@ -106,14 +109,28 @@ namespace socketcan_bridge
         }
       }
 
-      can_msgs::Frame msg;
-      // converts the can::Frame (socketcan.h) to can_msgs::Frame (ROS msg)
-      convertSocketCANToMessage(f, msg);
+      if (f.is_fd)
+      {
+        can_msgs::FrameFd msg;
+        // converts the can::Frame (socketcan.h) to can_msgs::FrameFd (ROS msg)
+        convertSocketCANFDToMessage(f, msg);
 
-      msg.header.frame_id = "";  // empty frame is the de-facto standard for no frame.
-      msg.header.stamp = ros::Time::now();
+        msg.header.frame_id = "";  // empty frame is the de-facto standard for no frame.
+        msg.header.stamp = ros::Time::now();
 
-      can_topic_.publish(msg);
+        can_fd_topic_.publish(msg);
+      }
+      else
+      {
+        can_msgs::Frame msg;
+        // converts the can::Frame (socketcan.h) to can_msgs::Frame (ROS msg)
+        convertSocketCANToMessage(f, msg);
+
+        msg.header.frame_id = "";  // empty frame is the de-facto standard for no frame.
+        msg.header.stamp = ros::Time::now();
+
+        can_topic_.publish(msg);
+      }
     };
 
 

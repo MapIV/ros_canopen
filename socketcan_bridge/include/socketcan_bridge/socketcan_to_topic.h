@@ -31,6 +31,7 @@
 #include <socketcan_interface/socketcan.h>
 #include <socketcan_interface/filter.h>
 #include <can_msgs/Frame.h>
+#include <can_msgs/FrameFd.h>
 #include <ros/ros.h>
 
 namespace socketcan_bridge
@@ -46,6 +47,7 @@ class SocketCANToTopic
 
   private:
     ros::Publisher can_topic_;
+    ros::Publisher can_fd_topic_;
     can::DriverInterfaceSharedPtr driver_;
 
     can::FrameListenerConstSharedPtr frame_listener_;
@@ -64,9 +66,25 @@ void convertSocketCANToMessage(const can::Frame& f, can_msgs::Frame& m)
   m.is_rtr = f.is_rtr;
   m.is_extended = f.is_extended;
 
-  for (int i = 0; i < 8; i++)  // always copy all data, regardless of dlc.
+  for (int i = 0; i < 8; i++)
   {
     m.data[i] = f.data[i];
+  }
+};
+
+void convertSocketCANFDToMessage(const can::Frame& f, can_msgs::FrameFd& m)
+{
+  m.id = f.id;
+  m.dlc = f.dlc;
+  m.is_error = f.is_error;
+  m.is_rtr = f.is_rtr;
+  m.is_extended = f.is_extended;
+
+  m.data.reserve(f.dlc);
+
+  for (int i = 0; i < f.dlc; i++)
+  {
+    m.data.push_back(f.data[i]);
   }
 };
 

@@ -30,7 +30,18 @@
 
 #include <socketcan_interface/socketcan.h>
 #include <can_msgs/Frame.h>
+#include <can_msgs/FrameFd.h>
 #include <ros/ros.h>
+
+#define _MASK(offset, len) (((1u << ((offset) + (len))) - 1u) ^ ((1u << (offset))-1u))
+
+#define CANMSG_DLC_DLC_OFFSET (0u)
+#define CANMSG_DLC_DLC_LEN (7u)
+#define CANMSG_DLC_DLC_MASK _MASK(CANMSG_DLC_DLC_OFFSET, CANMSG_DLC_DLC_LEN)
+
+#define CANMSG_DLC_FDFLAGS_OFFSET (CANMSG_DLC_DLC_LEN)
+#define CANMSG_DLC_FDFLAGS_LEN (1u)
+#define CANMSG_DLC_FDFLAGS_MASK _MASK(CANMSG_DLC_FDFLAGS_OFFSET, CANMSG_DLC_FDFLAGS_LEN)
 
 namespace socketcan_bridge
 {
@@ -42,23 +53,48 @@ class TopicToSocketCAN
 
   private:
     ros::Subscriber can_topic_;
+    ros::Subscriber can_fd_topic_;
     can::DriverInterfaceSharedPtr driver_;
 
     can::StateListenerConstSharedPtr state_listener_;
 
     void msgCallback(const can_msgs::Frame::ConstPtr& msg);
+    void msgFdCallback(const can_msgs::FrameFd::ConstPtr& msg);
     void stateCallback(const can::State & s);
 };
 
 void convertMessageToSocketCAN(const can_msgs::Frame& m, can::Frame& f)
 {
   f.id = m.id;
-  f.dlc = m.dlc;
+  f.dlc = (m.dlc & CANMSG_DLC_DLC_MASK) >> CANMSG_DLC_DLC_OFFSET;
+  f.is_fd = ((m.dlc & CANMSG_DLC_FDFLAGS_MASK) != 0) || (f.dlc > 8);
+  f.flags = (m.dlc & CANMSG_DLC_FDFLAGS_MASK) >> CANMSG_DLC_FDFLAGS_OFFSET;
   f.is_error = m.is_error;
   f.is_rtr = m.is_rtr;
   f.is_extended = m.is_extended;
 
-  for (int i = 0; i < 8; i++)  // always copy all data, regardless of dlc.
+  // int copy_len = m.data.size() > f.data.size() ? f.data.size() : m.data.size();
+  int copy_len = 8;
+
+  for (int i = 0; i < copy_len; i++)
+  {
+    f.data[i] = m.data[i];
+  }
+};
+
+void convertMessageToSocketCANFD(const can_msgs::FrameFd& m, can::Frame& f)
+{
+  f.id = m.id;
+  f.dlc = (m.dlc & CANMSG_DLC_DLC_MASK) >> CANMSG_DLC_DLC_OFFSET;
+  f.is_fd = ((m.dlc & CANMSG_DLC_FDFLAGS_MASK) != 0) || (f.dlc > 8);
+  f.flags = (m.dlc & CANMSG_DLC_FDFLAGS_MASK) >> CANMSG_DLC_FDFLAGS_OFFSET;
+  f.is_error = m.is_error;
+  f.is_rtr = m.is_rtr;
+  f.is_extended = m.is_extended;
+
+  int copy_len = m.data.size() > f.data.size() ? f.data.size() : m.data.size();
+
+  for (int i = 0; i < copy_len; i++)
   {
     f.data[i] = m.data[i];
   }

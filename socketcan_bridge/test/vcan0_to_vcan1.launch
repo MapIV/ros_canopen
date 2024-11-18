@@ -1,7 +1,7 @@
 <launch>
     <!-- 
         This launchfile expects two virtual can interfaces, vcan0 and vcan1. One node sends messages received
-        on vcan0 to the ros topic received_messages, another node passes the messages received here to vcan1.
+        on vcan0 to the ros topic received_fd_messages, another node passes the messages received here to vcan1.
 
         With the can-utils tools you can then use:
             cangen vcan0
@@ -17,6 +17,6 @@
     </node>
     <node pkg="socketcan_bridge" type="topic_to_socketcan_node" name="topic_to_socketcan_node" output="screen">
           <param name="can_device" value="vcan1" />
-          <remap from="sent_messages" to="received_messages" />
+          <remap from="sent_messages" to="received_fd_messages" />
     </node>
 </launch>

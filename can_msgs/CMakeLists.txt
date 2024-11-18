@@ -15,6 +15,7 @@ find_package(catkin REQUIRED
 add_message_files(DIRECTORY msg
   FILES
     Frame.msg
+    FrameFd.msg
 )
 
 generate_messages(

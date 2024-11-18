@@ -37,7 +37,7 @@ Changelog for package socketcan_bridge
 * keep NodeHandle alive in socketcan_bridge tests
 * migrated to std::function and std::bind
 * migrated to std pointers
-* compare can_msgs::Frame and can::Frame properly
+* compare can_msgs::FrameFd and can::Frame properly
 * Contributors: Mathias Lüdtke
 
 0.7.8 (2018-05-04)
@@ -116,7 +116,7 @@ Changelog for package socketcan_bridge
   is correct. Prevented possible crashes when can::tostring was called on
   invalid frames.
 * Adds conversion test between msg and SocketCAN Frame.
-  This test only covers the conversion between the can_msgs::Frame message and can::Frame from SocketCAN.
+  This test only covers the conversion between the can_msgs::FrameFd message and can::Frame from SocketCAN.
 * Introduces topic_to_socketcan and the bridge.
   Adds TopicToSocketCAN, the counterpart to the SocketCANToTopic class.
   Also introduces a node to use this class and a node which combines the two
