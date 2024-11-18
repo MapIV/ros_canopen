@@ -27,6 +27,7 @@
 #include <socketcan_bridge/socketcan_to_topic.h>
 
 #include <can_msgs/Frame.h>
+#include <can_msgs/FrameFd.h>
 #include <socketcan_interface/socketcan.h>
 #include <socketcan_interface/dummy.h>
 #include <socketcan_bridge/topic_to_socketcan.h>
@@ -80,6 +81,7 @@ TEST(SocketCANToTopicTest, checkCorrectData)
 
   // create a can frame
   can::Frame f;
+  f.is_fd = true;
   f.is_extended = true;
   f.is_rtr = false;
   f.is_error = false;
@@ -137,6 +139,7 @@ TEST(SocketCANToTopicTest, checkCorrectFdData)
 
   // create a can frame
   can::Frame f;
+  f.is_fd = true;
   f.is_extended = true;
   f.is_rtr = false;
   f.is_error = false;
@@ -246,6 +249,7 @@ TEST(SocketCANToTopicTest, checkCorrectCanIdFilter)
 
   // create a can frame
   can::Frame f;
+  f.is_fd = true;
   f.is_extended = true;
   f.is_rtr = false;
   f.is_error = false;
@@ -307,6 +311,7 @@ TEST(SocketCANToTopicTest, checkInvalidCanIdFilter)
 
   // create a can frame
   can::Frame f;
+  f.is_fd = true;
   f.is_extended = true;
   f.is_rtr = false;
   f.is_error = false;
