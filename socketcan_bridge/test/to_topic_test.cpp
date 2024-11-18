@@ -178,7 +178,7 @@ TEST(SocketCANToTopicTest, checkCorrectFdData)
   ros::WallDuration(1.0).sleep();
   ros::spinOnce();
 
-  ASSERT_EQ(1, message_collector_.messages.size());
+  ASSERT_EQ(1, message_collector_.messages_fd.size());
 
   // compare the received can_msgs::FrameFd message to the sent can::Frame.
   can::Frame received;
@@ -223,24 +223,26 @@ TEST(SocketCANToTopicTest, checkInvalidFrameHandling)
 
   // create a message
   can::Frame f;
+  f.is_fd = true;
   f.is_extended = false;
   f.id = (1<<11)+1;  // this is an illegal CAN packet... should not be sent.
 
   // send the can::Frame over the driver.
-  // driver_->send(f);
+  driver_->send(f);
 
   // give some time for the interface some time to process the message
   ros::WallDuration(1.0).sleep();
   ros::spinOnce();
-  EXPECT_EQ(message_collector_.messages.size(), 0);
+  EXPECT_EQ(message_collector_.messages_fd.size(), 0);
 
+  f.is_fd = true;
   f.is_extended = true;
   f.id = (1<<11)+1;  // now it should be alright.
 
   driver_->send(f);
   ros::WallDuration(1.0).sleep();
   ros::spinOnce();
-  EXPECT_EQ(message_collector_.messages.size(), 1);
+  EXPECT_EQ(message_collector_.messages_fd.size(), 1);
 }
 
 TEST(SocketCANToTopicTest, checkCorrectCanIdFilter)
