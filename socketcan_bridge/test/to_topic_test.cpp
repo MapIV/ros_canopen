@@ -267,11 +267,11 @@ TEST(SocketCANToTopicTest, checkCorrectCanIdFilter)
   msgCollector message_collector_;
 
   // register for messages on received_fd_messages.
-  ros::Subscriber subscriber_ = nh.subscribe("received_fd_messages", 1, &msgCollector::msgFdCallback, &message_collector_);
+  ros::Subscriber subscriber_ = nh.subscribe("received_messages", 1, &msgCollector::msgCallback, &message_collector_);
 
   // create a can frame
   can::Frame f;
-  f.is_fd = true;
+  f.is_fd = false;
   f.is_extended = true;
   f.is_rtr = false;
   f.is_error = false;
@@ -390,7 +390,7 @@ TEST(SocketCANToTopicTest, checkMaskFilter)
   ros::spinOnce();
 
   // compare the received can_msgs::Frame message to the sent can::Frame.
-  ASSERT_EQ(2, message_collector_.messages_fd.size());
+  ASSERT_EQ(2, message_collector_.messages.size());
   EXPECT_EQ(pass1, convertMessageToString(message_collector_.messages.front()));
   EXPECT_EQ(pass2, convertMessageToString(message_collector_.messages.back()));
 }
