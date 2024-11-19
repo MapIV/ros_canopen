@@ -9,6 +9,7 @@ endif()
 find_package(catkin REQUIRED
   COMPONENTS
     can_msgs
+    canfd_msgs
     rosconsole_bridge
     roscpp
     socketcan_interface
@@ -22,6 +23,7 @@ catkin_package(
     topic_to_socketcan
   CATKIN_DEPENDS
     can_msgs
+    canfd_msgs
     rosconsole_bridge
     roscpp
     socketcan_interface

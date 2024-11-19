@@ -28,6 +28,7 @@
 #include <socketcan_bridge/socketcan_to_topic.h>
 
 #include <can_msgs/Frame.h>
+#include <canfd_msgs/FrameFd.h>
 #include <socketcan_interface/socketcan.h>
 #include <socketcan_interface/dummy.h>
 
@@ -64,7 +65,7 @@ TEST(TopicToSocketCANTest, checkCorrectData)
   driver_->init("string_not_used", true);
 
   // register for messages on received_fd_messages.
-  ros::Publisher publisher_ = nh.advertise<can_msgs::FrameFd>("sent_fd_messages", 10);
+  ros::Publisher publisher_ = nh.advertise<canfd_msgs::FrameFd>("sent_fd_messages", 10);
 
   // create a frame collector.
   frameCollector frame_collector_;
@@ -75,7 +76,7 @@ TEST(TopicToSocketCANTest, checkCorrectData)
             std::bind(&frameCollector::frameCallback, &frame_collector_, std::placeholders::_1));
 
   // create a message
-  can_msgs::FrameFd msg;
+  canfd_msgs::FrameFd msg;
   msg.is_extended = true;
   msg.is_rtr = false;
   msg.is_error = false;
@@ -96,7 +97,7 @@ TEST(TopicToSocketCANTest, checkCorrectData)
   ros::WallDuration(1.0).sleep();
   ros::spinOnce();
 
-  can_msgs::FrameFd received;
+  canfd_msgs::FrameFd received;
   can::Frame f = frame_collector_.frames.back();
   socketcan_bridge::convertSocketCANFDToMessage(f, received);
 
@@ -123,7 +124,7 @@ TEST(TopicToSocketCANTest, checkCorrectFdData)
   driver_->init("string_not_used", true);
 
   // register for messages on received_fd_messages.
-  ros::Publisher publisher_ = nh.advertise<can_msgs::FrameFd>("sent_fd_messages", 10);
+  ros::Publisher publisher_ = nh.advertise<canfd_msgs::FrameFd>("sent_fd_messages", 10);
 
   // create a frame collector.
   frameCollector frame_collector_;
@@ -134,12 +135,12 @@ TEST(TopicToSocketCANTest, checkCorrectFdData)
             std::bind(&frameCollector::frameCallback, &frame_collector_, std::placeholders::_1));
 
   // create a message
-  can_msgs::FrameFd msg;
+  canfd_msgs::FrameFd msg;
   msg.is_extended = true;
   msg.is_rtr = false;
   msg.is_error = false;
   msg.id = 0x123;
-  msg.dlc = 64 | can_msgs::FrameFd::DLC_FD_BRS_FLAG;
+  msg.dlc = 64 | canfd_msgs::FrameFd::DLC_FD_BRS_FLAG;
   for (uint8_t i=0; i < 64; i++)
   {
     msg.data.push_back(i);
@@ -155,7 +156,7 @@ TEST(TopicToSocketCANTest, checkCorrectFdData)
   ros::WallDuration(1.0).sleep();
   ros::spinOnce();
 
-  can_msgs::FrameFd received;
+  canfd_msgs::FrameFd received;
   can::Frame f = frame_collector_.frames.back();
   socketcan_bridge::convertSocketCANFDToMessage(f, received);
 
@@ -185,7 +186,7 @@ TEST(TopicToSocketCANTest, checkInvalidFrameHandling)
   to_socketcan_bridge.setup();
 
   // register for messages on received_fd_messages.
-  ros::Publisher publisher_ = nh.advertise<can_msgs::FrameFd>("sent_fd_messages", 10);
+  ros::Publisher publisher_ = nh.advertise<canfd_msgs::FrameFd>("sent_fd_messages", 10);
 
   // create a frame collector.
   frameCollector frame_collector_;
@@ -195,7 +196,7 @@ TEST(TopicToSocketCANTest, checkInvalidFrameHandling)
           std::bind(&frameCollector::frameCallback, &frame_collector_, std::placeholders::_1));
 
   // create a message
-  can_msgs::FrameFd msg;
+  canfd_msgs::FrameFd msg;
   msg.is_extended = false;
   msg.id = (1<<11)+1;  // this is an illegal CAN packet... should not be sent.
   msg.header.frame_id = "0";  // "0" for no frame.

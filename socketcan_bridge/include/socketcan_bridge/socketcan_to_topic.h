@@ -31,7 +31,7 @@
 #include <socketcan_interface/socketcan.h>
 #include <socketcan_interface/filter.h>
 #include <can_msgs/Frame.h>
-#include <can_msgs/FrameFd.h>
+#include <canfd_msgs/FrameFd.h>
 #include <ros/ros.h>
 
 namespace socketcan_bridge
@@ -72,7 +72,7 @@ void convertSocketCANToMessage(const can::Frame& f, can_msgs::Frame& m)
   }
 };
 
-void convertSocketCANFDToMessage(const can::Frame& f, can_msgs::FrameFd& m)
+void convertSocketCANFDToMessage(const can::Frame& f, canfd_msgs::FrameFd& m)
 {
   m.id = f.id;
   m.dlc = f.dlc;
