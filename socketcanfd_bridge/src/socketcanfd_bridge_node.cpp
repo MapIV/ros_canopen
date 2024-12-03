@@ -25,70 +25,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SOCKETCAN_BRIDGE_SOCKETCAN_TO_TOPIC_H
-#define SOCKETCAN_BRIDGE_SOCKETCAN_TO_TOPIC_H
-
-#include <socketcan_interface/socketcan.h>
-#include <socketcan_interface/filter.h>
-#include <can_msgs/Frame.h>
-#include <can_msgs/FrameFd.h>
 #include <ros/ros.h>
+#include <socketcan_bridge/topic_to_socketcan.h>
+#include <socketcan_bridge/socketcan_to_topic.h>
+#include <socketcan_interface/threading.h>
+#include <socketcan_interface/xmlrpc_settings.h>
+#include <memory>
+#include <string>
 
-namespace socketcan_bridge
+
+int main(int argc, char *argv[])
 {
-class SocketCANToTopic
-{
-  public:
-    SocketCANToTopic(ros::NodeHandle* nh, ros::NodeHandle* nh_param, can::DriverInterfaceSharedPtr driver);
-    void setup();
-    void setup(const can::FilteredFrameListener::FilterVector &filters);
-    void setup(XmlRpc::XmlRpcValue filters);
-    void setup(ros::NodeHandle nh);
+  ros::init(argc, argv, "socketcanfd_bridge_node");
 
-  private:
-    ros::Publisher can_topic_;
-    ros::Publisher can_fd_topic_;
-    can::DriverInterfaceSharedPtr driver_;
+  ros::NodeHandle nh(""), nh_param("~");
 
-    can::FrameListenerConstSharedPtr frame_listener_;
-    can::StateListenerConstSharedPtr state_listener_;
+  std::string can_device;
+  nh_param.param<std::string>("can_device", can_device, "can0");
 
+  can::ThreadedSocketCANInterfaceSharedPtr driver = std::make_shared<can::ThreadedSocketCANInterface> ();
 
-    void frameCallback(const can::Frame& f);
-    void stateCallback(const can::State & s);
-};
-
-void convertSocketCANToMessage(const can::Frame& f, can_msgs::Frame& m)
-{
-  m.id = f.id;
-  m.dlc = f.dlc;
-  m.is_error = f.is_error;
-  m.is_rtr = f.is_rtr;
-  m.is_extended = f.is_extended;
-
-  for (int i = 0; i < 8; i++)
+  // initialize device at can_device, 0 for no loopback.
+  if (!driver->init(can_device, 0, XmlRpcSettings::create(nh_param)))
   {
-    m.data[i] = f.data[i];
+    ROS_FATAL("Failed to initialize can_device at %s", can_device.c_str());
+    return 1;
   }
-};
-
-void convertSocketCANFDToMessage(const can::Frame& f, can_msgs::FrameFd& m)
-{
-  m.id = f.id;
-  m.dlc = f.dlc;
-  m.is_error = f.is_error;
-  m.is_rtr = f.is_rtr;
-  m.is_extended = f.is_extended;
-
-  m.data.reserve(f.dlc);
-
-  for (int i = 0; i < f.dlc; i++)
+    else
   {
-    m.data.push_back(f.data[i]);
+    ROS_INFO("Successfully connected to %s.", can_device.c_str());
   }
-};
 
-};  // namespace socketcan_bridge
+  // initialize the bridge both ways.
+  socketcan_bridge::TopicToSocketCAN to_socketcan_bridge(&nh, &nh_param, driver);
+  to_socketcan_bridge.setup();
 
+  socketcan_bridge::SocketCANToTopic to_topic_bridge(&nh, &nh_param, driver);
+  to_topic_bridge.setup(nh_param);
 
-#endif  // SOCKETCAN_BRIDGE_SOCKETCAN_TO_TOPIC_H
+  ros::spin();
+
+  driver->shutdown();
+  driver.reset();
+
+  ros::waitForShutdown();
+}

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(socketcan_bridge)
+project(socketcanfd_bridge)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,6 +9,7 @@ endif()
 find_package(catkin REQUIRED
   COMPONENTS
     can_msgs
+    canfd_msgs
     rosconsole_bridge
     roscpp
     socketcan_interface
@@ -22,6 +23,7 @@ catkin_package(
     topic_to_socketcan
   CATKIN_DEPENDS
     can_msgs
+    canfd_msgs
     rosconsole_bridge
     roscpp
     socketcan_interface

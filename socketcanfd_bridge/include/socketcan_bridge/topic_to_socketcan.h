@@ -30,7 +30,7 @@
 
 #include <socketcan_interface/socketcan.h>
 #include <can_msgs/Frame.h>
-#include <can_msgs/FrameFd.h>
+#include <canfd_msgs/FrameFd.h>
 #include <ros/ros.h>
 
 #define _MASK(offset, len) (((1u << ((offset) + (len))) - 1u) ^ ((1u << (offset))-1u))
@@ -59,7 +59,7 @@ class TopicToSocketCAN
     can::StateListenerConstSharedPtr state_listener_;
 
     void msgCallback(const can_msgs::Frame::ConstPtr& msg);
-    void msgFdCallback(const can_msgs::FrameFd::ConstPtr& msg);
+    void msgFdCallback(const canfd_msgs::FrameFd::ConstPtr& msg);
     void stateCallback(const can::State & s);
 };
 
@@ -82,7 +82,7 @@ void convertMessageToSocketCAN(const can_msgs::Frame& m, can::Frame& f)
   }
 };
 
-void convertMessageToSocketCANFD(const can_msgs::FrameFd& m, can::Frame& f)
+void convertMessageToSocketCANFD(const canfd_msgs::FrameFd& m, can::Frame& f)
 {
   f.id = m.id;
   f.dlc = (m.dlc & CANMSG_DLC_DLC_MASK) >> CANMSG_DLC_DLC_OFFSET;

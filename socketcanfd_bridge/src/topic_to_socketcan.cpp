@@ -36,7 +36,7 @@ namespace socketcan_bridge
     {
       can_topic_ = nh->subscribe<can_msgs::Frame>("sent_messages", nh_param->param("sent_messages_queue_size", 10),
                     std::bind(&TopicToSocketCAN::msgCallback, this, std::placeholders::_1));
-      can_fd_topic_ = nh->subscribe<can_msgs::FrameFd>(
+      can_fd_topic_ = nh->subscribe<canfd_msgs::FrameFd>(
                       "sent_fd_messages",
                       nh_param->param("sent_fd_messages_queue_size", 10),
                       std::bind(&TopicToSocketCAN::msgFdCallback, this, std::placeholders::_1));
@@ -58,7 +58,7 @@ namespace socketcan_bridge
       can_msgs::Frame m = *msg.get();  // ROS message
       can::Frame f;  // socketcan type
 
-      // converts the can_msgs::FrameFd (ROS msg) to can::Frame (socketcan.h)
+      // converts the can_msgs::Frame (ROS msg) to can::Frame (socketcan.h)
       convertMessageToSocketCAN(m, f);
 
       if (!f.isValid())  // check if the id and flags are appropriate.
@@ -78,16 +78,16 @@ namespace socketcan_bridge
     };
 
 
-  void TopicToSocketCAN::msgFdCallback(const can_msgs::FrameFd::ConstPtr& msg)
+  void TopicToSocketCAN::msgFdCallback(const canfd_msgs::FrameFd::ConstPtr& msg)
     {
       // ROS_DEBUG("Message came from sent_messages topic");
 
       // translate it to the socketcan frame type.
 
-      can_msgs::FrameFd m = *msg.get();  // ROS message
+      canfd_msgs::FrameFd m = *msg.get();  // ROS message
       can::Frame f;  // socketcan type
 
-      // converts the can_msgs::FrameFd (ROS msg) to can::Frame (socketcan.h)
+      // converts the canfd_msgs::FrameFd (ROS msg) to can::Frame (socketcan.h)
       convertMessageToSocketCANFD(m, f);
 
       if (!f.isValid())  // check if the id and flags are appropriate.

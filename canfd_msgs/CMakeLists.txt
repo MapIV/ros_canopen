@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(can_msgs)
+project(canfd_msgs)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,7 +14,6 @@ find_package(catkin REQUIRED
 
 add_message_files(DIRECTORY msg
   FILES
-    Frame.msg
     FrameFd.msg
 )
 

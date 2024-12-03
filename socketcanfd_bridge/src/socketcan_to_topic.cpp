@@ -25,10 +25,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <can_msgs/Frame.h>
+#include <canfd_msgs/FrameFd.h>
 #include <socketcan_bridge/socketcan_to_topic.h>
 #include <socketcan_interface/string.h>
-#include <can_msgs/FrameFd.h>
-#include <can_msgs/Frame.h>
 #include <string>
 
 namespace can
@@ -55,7 +55,7 @@ namespace socketcan_bridge
     {
       can_topic_ = nh->advertise<can_msgs::Frame>("received_messages",
                                                   nh_param->param("received_messages_queue_size", 10));
-      can_fd_topic_ = nh->advertise<can_msgs::FrameFd>("received_fd_messages",
+      can_fd_topic_ = nh->advertise<canfd_msgs::FrameFd>("received_fd_messages",
                                                   nh_param->param("received_fd_messages_queue_size", 10));
       driver_ = driver;
     };
@@ -111,8 +111,8 @@ namespace socketcan_bridge
 
       if (f.is_fd)
       {
-        can_msgs::FrameFd msg;
-        // converts the can::Frame (socketcan.h) to can_msgs::FrameFd (ROS msg)
+        canfd_msgs::FrameFd msg;
+        // converts the can::Frame (socketcan.h) to canfd_msgs::FrameFd (ROS msg)
         convertSocketCANFDToMessage(f, msg);
 
         msg.header.frame_id = "";  // empty frame is the de-facto standard for no frame.
