@@ -36,7 +36,7 @@
 
 int main(int argc, char *argv[])
 {
-  ros::init(argc, argv, "socketcan_bridge_node");
+  ros::init(argc, argv, "socketcanfd_bridge_node");
 
   ros::NodeHandle nh(""), nh_param("~");
 
