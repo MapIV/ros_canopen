@@ -19,8 +19,8 @@ catkin_package(
   INCLUDE_DIRS
     include
   LIBRARIES
-    socketcan_to_topic
-    topic_to_socketcan
+    socketcanfd_to_topic
+    topic_to_socketcanfd
   CATKIN_DEPENDS
     can_msgs
     canfd_msgs
@@ -36,45 +36,45 @@ include_directories(
 
 
 # socketcan_to_topic
-add_library(socketcan_to_topic
+add_library(socketcanfd_to_topic
   src/rosconsole_bridge.cpp
-  src/socketcan_to_topic.cpp
+  src/socketcanfd_to_topic.cpp
 )
-target_link_libraries(socketcan_to_topic
+target_link_libraries(socketcanfd_to_topic
   ${catkin_LIBRARIES}
 )
-add_dependencies(socketcan_to_topic
+add_dependencies(socketcanfd_to_topic
   ${catkin_EXPORTED_TARGETS}
 )
 
 # topic_to_socketcan
-add_library(topic_to_socketcan
+add_library(topic_to_socketcanfd
   src/rosconsole_bridge.cpp
-  src/topic_to_socketcan.cpp
+  src/topic_to_socketcanfd.cpp
 )
-target_link_libraries(topic_to_socketcan
+target_link_libraries(topic_to_socketcanfd
   ${catkin_LIBRARIES}
 )
-add_dependencies(topic_to_socketcan
+add_dependencies(topic_to_socketcanfd
   ${catkin_EXPORTED_TARGETS}
 )
 
 # socketcan_to_topic_node
-add_executable(socketcan_to_topic_node
-  src/socketcan_to_topic_node.cpp
+add_executable(socketcanfd_to_topic_node
+  src/socketcanfd_to_topic_node.cpp
 )
-target_link_libraries(socketcan_to_topic_node
-  socketcan_to_topic
+target_link_libraries(socketcanfd_to_topic_node
+  socketcanfd_to_topic
   ${catkin_LIBRARIES}
 )
 
 # topic_to_socketcan_node
-add_executable(topic_to_socketcan_node
-  src/topic_to_socketcan_node.cpp
+add_executable(topic_to_socketcanfd_node
+  src/topic_to_socketcanfd_node.cpp
 
 )
-target_link_libraries(topic_to_socketcan_node
-  topic_to_socketcan
+target_link_libraries(topic_to_socketcanfd_node
+  topic_to_socketcanfd
   ${catkin_LIBRARIES}
 )
 
@@ -83,18 +83,18 @@ add_executable(${PROJECT_NAME}_node
   src/${PROJECT_NAME}_node.cpp
 )
 target_link_libraries(${PROJECT_NAME}_node
-  topic_to_socketcan
-  socketcan_to_topic
+  topic_to_socketcanfd
+  socketcanfd_to_topic
   ${catkin_LIBRARIES}
 )
 
 install(
   TARGETS
     ${PROJECT_NAME}_node
-    socketcan_to_topic
-    socketcan_to_topic_node
-    topic_to_socketcan
-    topic_to_socketcan_node
+    socketcanfd_to_topic
+    socketcanfd_to_topic_node
+    topic_to_socketcanfd
+    topic_to_socketcanfd_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -118,17 +118,17 @@ if(CATKIN_ENABLE_TESTING)
     test/test_conversion.cpp
   )
   target_link_libraries(test_conversion
-    topic_to_socketcan
-    socketcan_to_topic
+    topic_to_socketcanfd
+    socketcanfd_to_topic
     ${catkin_LIBRARIES}
   )
 
 
-  add_rostest_gtest(test_to_socketcan
+  add_rostest_gtest(test_to_socketcanfd
     test/to_socketcan.test
     test/to_socketcan_test.cpp
   )
-  target_link_libraries(test_to_socketcan
+  target_link_libraries(test_to_socketcanfd
     topic_to_socketcan
     ${catkin_LIBRARIES}
   )
@@ -138,8 +138,8 @@ if(CATKIN_ENABLE_TESTING)
     test/to_topic_test.cpp
   )
   target_link_libraries(test_to_topic
-    socketcan_to_topic
-    topic_to_socketcan
+    socketcanfd_to_topic
+    topic_to_socketcanfd
     ${catkin_LIBRARIES}
   )
 
